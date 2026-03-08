@@ -2,17 +2,20 @@
 
 Synthesisable SystemVerilog implementations of IEEE 754 single-precision floating-point division, with self-checking testbenches.
 
-Three digit-recurrence architectures are provided in Part 1, covering the progression from the simplest restoring algorithm through non-restoring to SRT radix-2. All modules share a common set of combinational helper modules for operand classification, exception handling, and round-to-nearest-even packing. Three further architectures (SRT-4, Newton–Raphson, Goldschmidt) are planned for Part 2.
+Six architectures are provided, spanning both algorithm families used in hardware FP division: digit-recurrence (shift-and-subtract) and multiplicative iteration (Newton–Raphson, Goldschmidt). All modules share a common set of combinational helper modules for operand classification, exception handling, and round-to-nearest-even packing.
 
 ---
 
 ## Implementations
 
-| Module | Algorithm | Worst-Case Latency | Digit Set |
-|---|---|---|---|
-| `divider_fp32_restoring` | Restoring | ~29 cycles | {0, 1} |
-| `divider_fp32_nonrestoring` | Non-restoring | ~31 cycles | {-1, +1} |
-| `divider_fp32_srt2` | SRT radix-2 | ~29 cycles | {-1, 0, +1} |
+| Module | Algorithm | Digit Set | Bits/Cycle | Latency | ULP Tolerance |
+|---|---|---|---|---|---|
+| `divider_fp32_restoring` | Restoring | {0, 1} | 1 | ~29 cycles | ±1 |
+| `divider_fp32_nonrestoring` | Non-restoring | {-1, +1} | 1 | ~31 cycles | ±1 |
+| `divider_fp32_srt2` | SRT radix-2 | {-1, 0, +1} | 1 | ~29 cycles | ±1 |
+| `divider_fp32_srt4` | Radix-4 (double-step restoring) | {0, 1, 2, 3} | 2 | ~17 cycles | ±1 |
+| `divider_fp32_newtonraphson` | Newton–Raphson reciprocal | — | — | ~10 cycles | ±2 |
+| `divider_fp32_goldschmidt` | Goldschmidt convergence | — | — | ~15 cycles | ±2 |
 
 ### Shared Helper Modules
 
@@ -48,10 +51,16 @@ FP32_dividers/
 ├── divider_fp32_restoring.sv             # Restoring mantissa division
 ├── divider_fp32_nonrestoring.sv          # Non-restoring mantissa division
 ├── divider_fp32_srt2.sv                  # SRT radix-2 mantissa division
+├── divider_fp32_srt4.sv                  # Radix-4 double-step restoring division
+├── divider_fp32_newtonraphson.sv         # Newton–Raphson reciprocal iteration
+├── divider_fp32_goldschmidt.sv           # Goldschmidt convergence division
 ├── tb_fp32_tasks.sv                      # Shared testbench tasks and reference model
 ├── tb_divider_fp32_restoring.sv          # Testbench — restoring
 ├── tb_divider_fp32_nonrestoring.sv       # Testbench — non-restoring
-├── tb_divider_fp32_srt2.sv               # Testbench — SRT radix-2
+├── tb_divider_fp32_srt2.sv              # Testbench — SRT radix-2
+├── tb_divider_fp32_srt4.sv              # Testbench — radix-4
+├── tb_divider_fp32_newtonraphson.sv      # Testbench — Newton–Raphson
+├── tb_divider_fp32_goldschmidt.sv        # Testbench — Goldschmidt
 ├── fp32_dividers_report.md               # Technical report
 └── README.md
 ```
@@ -60,26 +69,44 @@ FP32_dividers/
 
 ## Simulation
 
-All testbenches are compatible with **Icarus Verilog 12.0** (`iverilog -g2012`) and produce VVP simulation binaries. Each testbench runs 20 directed corner cases, 5 boundary cases, and 500 random normalised FP32 pairs, checking results against a software reference model with ±1 ULP tolerance.
+All testbenches are compatible with **Icarus Verilog 12.0** (`iverilog -g2012`). Each testbench runs 20 directed corner cases, 5 boundary cases, and 500 random normalised FP32 pairs, checking results against a software reference model. All six dividers pass 525/525 tests.
 
 ```bash
 # Restoring
-iverilog -g2012 -o sim_fp_restoring \
+iverilog -g2012 -o tb_restoring \
     fp32_classify.sv fp32_exception_check.sv fp32_round_rne.sv \
     divider_fp32_restoring.sv tb_divider_fp32_restoring.sv
-vvp sim_fp_restoring
+vvp tb_restoring
 
 # Non-restoring
-iverilog -g2012 -o sim_fp_nonrestoring \
+iverilog -g2012 -o tb_nonrestoring \
     fp32_classify.sv fp32_exception_check.sv fp32_round_rne.sv \
     divider_fp32_nonrestoring.sv tb_divider_fp32_nonrestoring.sv
-vvp sim_fp_nonrestoring
+vvp tb_nonrestoring
 
 # SRT radix-2
-iverilog -g2012 -o sim_fp_srt2 \
+iverilog -g2012 -o tb_srt2 \
     fp32_classify.sv fp32_exception_check.sv fp32_round_rne.sv \
     divider_fp32_srt2.sv tb_divider_fp32_srt2.sv
-vvp sim_fp_srt2
+vvp tb_srt2
+
+# Radix-4
+iverilog -g2012 -o tb_srt4 \
+    fp32_classify.sv fp32_exception_check.sv fp32_round_rne.sv \
+    divider_fp32_srt4.sv tb_divider_fp32_srt4.sv
+vvp tb_srt4
+
+# Newton–Raphson
+iverilog -g2012 -o tb_newtonraphson \
+    fp32_classify.sv fp32_exception_check.sv fp32_round_rne.sv \
+    divider_fp32_newtonraphson.sv tb_divider_fp32_newtonraphson.sv
+vvp tb_newtonraphson
+
+# Goldschmidt
+iverilog -g2012 -o tb_goldschmidt \
+    fp32_classify.sv fp32_exception_check.sv fp32_round_rne.sv \
+    divider_fp32_goldschmidt.sv tb_divider_fp32_goldschmidt.sv
+vvp tb_goldschmidt
 ```
 
 > **Note:** The testbench reference model (`fp32_div_ref`) uses manual FP32→FP64 rebias arithmetic rather than `$bitstoshortreal`, for full iverilog compatibility. See `tb_fp32_tasks.sv` for implementation details.
@@ -97,7 +124,7 @@ Each testbench exercises the following categories:
 | Random normal | 500 | Random normalised FP32 pairs with exponents in [1, 254] |
 | **Total** | **525** | Per divider module |
 
-Results are checked against the software reference with a ±1 ULP tolerance. All three dividers pass all 525 test cases.
+Digit-recurrence dividers are checked at ±1 ULP; iterative methods (Newton–Raphson, Goldschmidt) at ±2 ULP.
 
 ---
 
@@ -105,31 +132,33 @@ Results are checked against the software reference with a ±1 ULP tolerance. All
 
 ### Restoring Division
 
-The simplest digit-recurrence approach. At each iteration, trial-subtract the divisor from the partial remainder. If the result is negative, the original remainder is restored (quotient bit = 0); otherwise the subtraction is accepted (quotient bit = 1). Produces one quotient bit per cycle over 25 iterations for a 25-bit mantissa quotient (23 stored + 1 guard + 1 rounding bit).
+The simplest digit-recurrence approach. At each iteration, trial-subtract the divisor from the partial remainder. If the result is negative, the original remainder is restored (quotient bit = 0); otherwise the subtraction is accepted (quotient bit = 1). Produces one quotient bit per cycle over 25 iterations.
 
 ### Non-Restoring Division
 
-Eliminates the conditional restore by allowing the partial remainder to go negative. Quotient digits are drawn from {-1, +1} rather than {0, 1}. The sign of the current remainder determines whether to add or subtract the divisor on the next step. A final correction pass converts the signed-digit representation to binary and adjusts for any negative final remainder. Gives a uniform single-adder critical path per cycle at the cost of one extra state and more complex quotient conversion.
+Eliminates the conditional restore by allowing the partial remainder to go negative. Quotient digits are drawn from {-1, +1}. The sign of the current remainder determines whether to add or subtract the divisor on the next step. A final correction pass converts the signed-digit representation to binary. Gives a uniform single-adder critical path per cycle.
 
 ### SRT Radix-2
 
-Extends non-restoring with a third quotient digit: 0. When the partial remainder falls within a central overlap region (|rem| < D/2), no arithmetic is performed — the cycle shifts the remainder without an add or subtract. This reduces average switching activity and dynamic power. Quotient digits are accumulated in redundant form (qpos/qneg registers), with the binary result recovered as qpos − qneg after a final correction. Worst-case latency equals non-restoring, but average-case latency and energy are lower.
+Extends non-restoring with a third quotient digit: 0. When the partial remainder falls within a central overlap region (|rem| < D/2), no arithmetic is performed. This reduces average switching activity and dynamic power. Quotient digits are accumulated in redundant form (qpos/qneg registers), with the binary result recovered as qpos − qneg.
+
+### Radix-4 (Double-Step Restoring)
+
+Produces two quotient bits per cycle by performing two cascaded restoring trial-subtractions within a single clock period. This halves the iteration count (13 vs 25 for radix-2). The approach uses a non-redundant digit set {0, 1, 2, 3} — simpler than true SRT-4 with carry-save arithmetic and a PLA-based digit selection table, at the cost of a longer combinational path (two subtracts in series per cycle).
+
+### Newton–Raphson
+
+A multiplicative method that computes 1/B via the iteration x_{n+1} = x_n(2 − Bx_n), then forms Q = A × (1/B). A 256-entry seed table provides an 8-bit initial reciprocal estimate; 3 iterations double the precision each time (8→16→32 bits). Lowest latency of all methods but requires a 32×32 multiplier and seed ROM.
+
+### Goldschmidt
+
+Simultaneously scales numerator N and denominator D by correction factor F = 2 − D each iteration, converging D towards 1.0 and N towards the quotient. Pre-scales both N and D by a seed reciprocal to bring D₀ ≈ 1.0 with ~8-bit accuracy, then 3 iterations achieve full precision. The two multiplications per iteration (N×F and D×F) are independent and could be parallelised on a dual-ported multiplier.
 
 ---
 
 ## Companion Repository
 
 The integer division counterpart to this project is available at [Integer_dividers](https://github.com/BrendanJamesLynskey/Integer_dividers), covering restoring, non-performing, non-restoring, SRT-4, and Newton–Raphson architectures for fixed-point operands.
-
----
-
-## Planned (Part 2)
-
-| Module | Algorithm |
-|---|---|
-| `divider_fp32_srt4` | SRT radix-4, digit set {-2,-1,0,+1,+2}, carry-save partial remainder |
-| `divider_fp32_newtonraphson` | Newton–Raphson iterative reciprocal with table seed |
-| `divider_fp32_goldschmidt` | Goldschmidt convergence division, simultaneous N/D scaling |
 
 ---
 

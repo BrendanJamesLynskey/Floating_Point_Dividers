@@ -192,11 +192,89 @@ The overlap region `[-D/2, +D/2)` is the key contribution of SRT: within this ba
 
 **Disadvantages.** Three-way comparison is wider than non-restoring's sign check; worst-case latency is identical; the power benefit depends on the operand distribution and is most significant in SoCs where dynamic power dominates.
 
+### 5.4 Radix-4 Double-Step Restoring Division (divider_fp32_srt4)
+
+**Algorithm.** This design produces two quotient bits per clock cycle by cascading two restoring trial-subtractions within each iteration. In each cycle:
+
+1. **Sub-step 1:** Left-shift the partial remainder by 1, trial-subtract the divisor. If non-negative, accept (bit = 1); if negative, restore (bit = 0).
+2. **Sub-step 2:** Take the result of sub-step 1, left-shift by 1, trial-subtract again. Same logic.
+
+This is equivalent to a radix-4 divider with the non-redundant digit set {0, 1, 2, 3}, where the two binary bits produced each cycle encode one radix-4 digit.
+
+**Comparison with true SRT-4.** A true SRT radix-4 divider uses the redundant signed digit set {-2, -1, 0, +1, +2} and maintains the partial remainder in carry-save form. The quotient digit is selected by a PLA (Programmable Logic Array) or lookup table that inspects only the top few bits of the carry-save remainder and the divisor. This avoids full carry propagation in the critical path, allowing a higher clock frequency. However, it requires the partial remainder to stay within the convergence bound |w| ≤ (2/3)D, which is difficult to guarantee for normalised mantissas in [1, 2) without the carry-save representation.
+
+The double-step restoring approach used here avoids carry-save complexity entirely: both sub-steps use standard binary subtraction, and the partial remainder is always non-negative. The trade-off is a longer combinational critical path within each cycle (two subtracts and two muxes in series), which may limit the achievable clock frequency in synthesis.
+
+**Pre-compare step.** Before entering the radix-4 loop, a single restoring trial (without left-shift) determines the quotient's integer (hidden) bit. This establishes whether the quotient is in [1.0, 2.0) or [0.5, 1.0).
+
+**Quotient accumulation.** The 27-bit quotient register accumulates 1 bit from the pre-compare and 2 bits per iteration over 13 iterations, giving 27 total bits. The normalisation step extracts the 23 stored mantissa bits plus guard/round/sticky for RNE rounding.
+
+**Latency.** 1 (setup) + 1 (pre-compare) + 13 (iterations) + 1 (normalise) + 1 (output) = 17 cycles.
+
+**Advantages.** Roughly 2× throughput improvement over radix-2 methods with minimal additional hardware (one extra subtractor in the combinational cascade). No signed-digit conversion or correction step.
+
+**Disadvantages.** The two cascaded subtracts double the critical path compared to a single restoring step. True SRT-4 with carry-save would achieve the same throughput with a shorter critical path, at the cost of significantly more complex control logic.
+
+### 5.5 Newton–Raphson Reciprocal Division (divider_fp32_newtonraphson)
+
+**Algorithm.** Newton–Raphson division computes Q = A / B by first finding 1/B via the iteration:
+
+```
+x_{n+1} = x_n × (2 − B × x_n)
+```
+
+and then forming Q = A × (1/B) in a final multiplication. Each iteration approximately doubles the number of correct bits (quadratic convergence), so starting from a ~8-bit table seed, 3 iterations yield well over 24 bits of precision.
+
+**Seed table.** A 256-entry × 9-bit ROM is indexed by the top 8 fractional bits of the divisor mantissa (`b_mant_full[22:15]`). The entry approximates the reciprocal of the divisor significand, covering the range (0.5, 1.0] in Q0.9 format. The table is generated as `seed[i] = round(65536 / (256 + i))`.
+
+**Fixed-point conventions.** The implementation uses two fixed-point formats:
+
+- **b_reg** (divisor): Q1.31 — 32 bits, value = b_reg / 2^31. The 24-bit mantissa is extended to 32 bits by appending 8 zero bits.
+- **x_reg** (reciprocal estimate): Q0.32 — 32 bits, value = x_reg / 2^32. Range (0.5, 1.0].
+
+The key multiply alignments:
+- `b_reg × x_reg` → Q1.63 (64 bits). Bit 62 is the 1.0 position. Truncated to Q1.31 as `prod[62:31]`.
+- `(2 − bx)` is computed as `~bx_trunc + 1` (unsigned negation = 2^32 − bx in Q1.31).
+- `x_reg × factor` → Q1.63. The new reciprocal is extracted as `prod[62:31]`.
+- Final multiply: `a_reg(Q1.23) × x_reg(Q0.32)` → Q1.55 (56 bits). Bit 54 = 1.0 position. 25-bit quotient from `prod[54:30]`.
+
+**Iteration count.** 3 iterations from an 8-bit seed: 8 → 16 → 32 → 64 correct bits. The third iteration is conservative for FP32 (24 bits needed) but ensures the guard/round/sticky bits are correct.
+
+**Latency.** 1 (setup + seed) + 6 (3 iterations × 2 states each) + 2 (final multiply + normalise) + 1 (output) = 10 cycles.
+
+**Advantages.** Lowest latency of all six methods. Well-suited to designs that already have a fast multiplier available (common in DSP-oriented SoCs and GPU shader units).
+
+**Disadvantages.** Requires a full 32×32-bit multiplier and a 256-entry seed ROM, both of which dominate the area budget. The final multiplication step introduces an additional source of rounding error, limiting accuracy to ±2 ULP.
+
+### 5.6 Goldschmidt Convergence Division (divider_fp32_goldschmidt)
+
+**Algorithm.** Goldschmidt division simultaneously scales both numerator (N) and denominator (D) by a correction factor F each iteration, converging D towards 1.0 and N towards the quotient:
+
+```
+F_i = 2 − D_i
+N_{i+1} = N_i × F_i
+D_{i+1} = D_i × F_i
+```
+
+When D converges to 1.0, N converges to N_0 / D_0 = A / B.
+
+**Pre-scaling requirement.** Raw Goldschmidt starts with D in [1.0, 2.0), giving up to 50% initial error from 1.0. Quadratic convergence from e = 0.5 requires many iterations to reach 24-bit precision. To match Newton–Raphson's efficiency, both N and D are pre-multiplied by an initial reciprocal approximation R0 from the same seed table used by Newton–Raphson. After pre-scaling, D₀ ≈ 1.0 with ~8-bit error, and 3 Goldschmidt iterations converge to full precision (8 → 16 → 32 → 64 correct bits).
+
+**Fixed-point conventions.** All three registers (N, D, F) use Q1.31 format (32 bits, bit 31 = 1.0 position). Products are Q2.62 (64 bits, bit 62 = 1.0), truncated to Q1.31 as `prod[62:31]`. The correction factor `F = 2 − D` is computed as `~D + 1` (unsigned negation).
+
+**Comparison with Newton–Raphson.** Both methods have the same convergence rate (quadratic). The key difference is that Goldschmidt's two multiplications per iteration (N×F and D×F) are independent — they share the same factor F and could be computed simultaneously on a dual-ported multiplier. Newton–Raphson's two multiplications are sequential (bx must complete before computing x × (2−bx)). In this sequential implementation the distinction is moot (both use one multiplier), but in a production FPU with dual multiply ports, Goldschmidt can match Newton–Raphson's latency. Goldschmidt also naturally produces the quotient directly rather than the reciprocal, avoiding the final multiply.
+
+**Latency.** 1 (setup) + 2 (pre-scale N, D) + 9 (3 iterations × 3 states: compute F, mul N, mul D) + 2 (extract + normalise) + 1 (output) = 15 cycles.
+
+**Advantages.** Parallelisable multiplications; produces the quotient directly (no final A × (1/B) multiply); used in production by IBM POWER series processors and some GPU designs.
+
+**Disadvantages.** Higher latency than Newton–Raphson in sequential implementation (15 vs 10 cycles) due to the three states per iteration rather than two. Same multiplier and ROM area requirements.
+
 ---
 
 ## 6. Exponent and Sign Handling
 
-All three dividers compute the result sign and exponent identically in their `S_IDLE` state:
+All six dividers compute the result sign and exponent identically:
 
 **Sign.** The result sign is simply `a_sign XOR b_sign`, per the IEEE 754 sign rule for division.
 
@@ -333,51 +411,50 @@ The 5 boundary cases exercise values exactly 1 ULP above or below powers of two 
 
 The table below summarises the key characteristics of each divider. Note that these are architectural comparisons — actual area and timing depend on the synthesis target (FPGA fabric or ASIC process node), clock frequency constraints, and the synthesis tool's optimisation choices.
 
-| Property | Restoring | Non-Restoring | SRT Radix-2 |
-|---|---|---|---|
-| Quotient digit set | {0, 1} | {-1, +1} | {-1, 0, +1} |
-| Iterations | 25 | 25 | 25 |
-| Correction cycles | 0 | 2 | 2 |
-| Total latency (worst case) | ~29 cycles | ~31 cycles | ~29 cycles |
-| Adder operations per iteration | 1 (worst: 2 conceptually) | exactly 1 | 0 or 1 |
-| Remainder width | 49 bits (unsigned) | 50 bits (signed) | 50 bits (signed) |
-| Quotient registers | 1 × 25 bits | 1 × 25 bits (polynomial) | 2 × 25 bits (qpos + qneg) |
-| Selection logic | Sign check (1 bit) | Sign check (1 bit) | 3-way comparison |
-| Post-division conversion | None | Signed-digit → binary | Subtraction (qpos - qneg) |
-| Average switching activity | High (adder fires every cycle) | High (adder fires every cycle) | Lower (zero-digit cycles idle adder) |
-| Control complexity | Simplest | Moderate | Moderate |
+| Property | Restoring | Non-Restoring | SRT Radix-2 | Radix-4 | Newton–Raphson | Goldschmidt |
+|---|---|---|---|---|---|---|
+| Quotient digit set | {0, 1} | {-1, +1} | {-1, 0, +1} | {0, 1, 2, 3} | — | — |
+| Iterations | 25 | 25 | 25 | 13 | 3 (+ final mul) | 3 (+ pre-scale) |
+| Correction cycles | 0 | 2 | 2 | 0 | 0 | 0 |
+| Total latency (worst case) | ~29 cycles | ~31 cycles | ~29 cycles | ~17 cycles | ~10 cycles | ~15 cycles |
+| Adder operations/iteration | 1 | exactly 1 | 0 or 1 | 2 (cascaded) | — | — |
+| Multiplier required | No | No | No | No | 32×32 | 32×32 |
+| Seed ROM required | No | No | No | No | 256×9 bit | 256×9 bit |
+| Remainder width | 49 bits (unsigned) | 50 bits (signed) | 50 bits (signed) | 25 bits | — | — |
+| Quotient registers | 1 × 25 bits | 1 × 25 bits | 2 × 25 bits | 1 × 27 bits | — | — |
+| ULP accuracy | ±1 | ±1 | ±1 | ±1 | ±2 | ±2 |
+| Control complexity | Simplest | Moderate | Moderate | Moderate | Moderate | Moderate |
+| Area estimate | Lowest | Low | Low | Low–medium | High | High |
 
 ### Area Observations
 
-The dominant area contributor in all three designs is the 49/50-bit adder/subtractor in the mantissa path. The restoring design uses the simplest control (one comparator, one mux), while non-restoring adds the signed-digit conversion logic and SRT-2 adds the three-way comparator. However, the combinational helper modules (`fp32_classify`, `fp32_exception_check`, `fp32_round_rne`) are shared and identical across all three, so the area differences are concentrated in the FSM and quotient path.
+For the four digit-recurrence designs, the dominant area contributor is the adder/subtractor in the mantissa path. The restoring design uses the simplest control; non-restoring adds signed-digit conversion logic; SRT-2 adds a three-way comparator; and radix-4 cascades two subtracts per cycle. The combinational helper modules are shared and identical across all six designs.
 
-SRT-2 uses two quotient registers (qpos and qneg) instead of one, adding approximately 50 flip-flops compared to non-restoring's single polynomial register. This is a modest overhead (roughly 10% of the total register count) that buys the cleaner conversion path and the power-saving zero-digit capability.
+The radix-4 design adds approximately one extra subtractor's worth of logic (25 bits) compared to the radix-2 designs, plus a slightly wider quotient register (27 vs 25 bits). This is a modest area increase for a 2× throughput improvement.
+
+The multiplicative methods (Newton–Raphson and Goldschmidt) are dominated by the 32×32-bit multiplier, which is substantially larger than an adder. The 256×9-bit seed ROM adds a small but non-trivial contribution. Both methods share the same seed table design. In a full SoC where a multiplier is already available for other purposes (e.g. FP multiply), the marginal area cost of adding a multiplicative divider is much lower.
 
 ### Timing Observations
 
-The critical path in all three designs runs through the mantissa adder/subtractor and into the remainder register. For restoring, the path includes the trial-subtract, sign check, and mux. For non-restoring, the path is the add or subtract (selected by the sign) and the shift. For SRT-2, the critical path in the non-zero-digit case is similar to non-restoring, but the zero-digit path has a shorter delay (shift only, no adder). A timing-aware synthesis tool may be able to exploit this to achieve a slightly higher clock frequency, though the benefit depends on whether the adder is actually on the critical path of the overall design.
+The critical path varies significantly across the designs. The digit-recurrence methods have a critical path through a single adder/subtractor, except for radix-4, which chains two subtracts and two muxes within one cycle. This approximately doubles the combinational delay per cycle, partially offsetting the throughput benefit — the wall-clock time improvement is less than 2×.
+
+The multiplicative methods have a critical path through a 32×32 multiplier, which is typically longer than a 25-bit adder. However, they complete in far fewer cycles. For a design targeting a fixed clock frequency, the multiplicative methods are attractive if the multiplier fits within the clock period; if not, the multiplier may need to be pipelined, adding latency.
 
 ---
 
-## 10. Planned Extensions (Part 2)
+## 10. Conclusion
 
-Three additional divider architectures are planned:
+This project demonstrates the full spectrum of floating-point division algorithms within the IEEE 754 FP32 framework, from the elementary restoring method through increasingly sophisticated digit-recurrence variants to multiplicative convergence techniques.
 
-**SRT Radix-4** (`divider_fp32_srt4`). Produces two quotient bits per cycle using the digit set {-2, -1, 0, +1, +2}. The partial remainder is maintained in carry-save form to avoid carry propagation in the selection logic. A PLA (Programmable Logic Array) or lookup table selects the quotient digit based on the top few bits of the remainder and divisor. This halves the iteration count (13 iterations for 26 quotient bits) at the cost of a wider selection table and carry-save arithmetic. SRT-4 is the dominant approach in modern production FPUs (e.g. AMD, Intel, ARM Cortex-A series).
+The six implementations collectively illustrate the fundamental trade-offs in division hardware:
 
-**Newton–Raphson** (`divider_fp32_newtonraphson`). A multiplicative method that computes the reciprocal 1/b via the iteration `x_{n+1} = x_n × (2 - b × x_n)`, starting from a table-lookup seed. Each iteration squares the number of correct bits, so 3 iterations from an 8-bit seed yield ~24 bits of precision. The final quotient is obtained by multiplying `a × (1/b)`. This requires two multipliers (or one time-multiplexed) and a small ROM, but converges in O(log N) steps rather than O(N), making it attractive for wide formats (FP64, FP128). The challenge is ensuring the final multiplication and rounding produce a correctly-rounded result.
+- **Simplicity vs. efficiency**: restoring division is the easiest to understand and verify, but non-restoring eliminates the conditional restore for a more uniform critical path.
+- **Uniform timing vs. conditional operation**: SRT radix-2 extends non-restoring with a zero digit that saves power when the remainder is small.
+- **Throughput vs. critical path**: radix-4 doubles the bits-per-cycle by cascading two restoring steps, halving the iteration count at the cost of a longer combinational path.
+- **Area vs. latency**: Newton–Raphson and Goldschmidt achieve the lowest latencies (10 and 15 cycles respectively) but require a full-width multiplier and seed ROM that dominate the area budget.
+- **Sequential vs. parallel**: Goldschmidt's two independent multiplications per iteration can be parallelised on dual-ported hardware, while Newton–Raphson's multiplications are inherently sequential.
 
-**Goldschmidt** (`divider_fp32_goldschmidt`). A variant of Newton–Raphson that simultaneously scales both numerator and denominator by the same correction factor each iteration, converging the denominator to 1.0 and the numerator to the quotient. The iteration is `N_{i+1} = N_i × F_i`, `D_{i+1} = D_i × F_i`, where `F_i = 2 - D_i`. This has the same convergence rate as Newton–Raphson but both multiplications are independent and can be performed in parallel on a dual-ported multiplier. Goldschmidt is used in IBM POWER series processors and some GPU designs.
-
----
-
-## 11. Conclusion
-
-This project demonstrates the progression of floating-point division algorithms from the elementary restoring method through non-restoring to SRT radix-2, all within the IEEE 754 FP32 framework. The shared helper module architecture — classification, exception handling, and rounding — cleanly separates the IEEE 754 compliance logic from the core mantissa division algorithms, allowing each new divider variant to focus exclusively on its digit-recurrence strategy.
-
-The three implementations collectively illustrate the fundamental trade-offs in division hardware: simplicity vs. efficiency (restoring vs. non-restoring), uniform timing vs. conditional operation (non-restoring vs. SRT), and register count vs. conversion complexity (signed-digit polynomial vs. redundant qpos/qneg accumulators). These trade-offs recur at every level of hardware design, from individual arithmetic units to complete FPU pipelines.
-
-The planned Part 2 extensions will demonstrate the next level of these trade-offs: SRT-4's carry-save complexity for halved iteration count, and the multiplicative methods' O(log N) convergence at the cost of multiplier area — completing the survey of division architectures from the simplest to the most hardware-intensive.
+The shared helper module architecture — classification, exception handling, and rounding — cleanly separates the IEEE 754 compliance logic from the core division algorithms. This modular approach allowed each new divider variant to be developed and verified independently, reusing the same testbench infrastructure and reference model across all six designs.
 
 ---
 
