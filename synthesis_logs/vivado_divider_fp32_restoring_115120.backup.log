@@ -1,0 +1,34 @@
+#-----------------------------------------------------------
+# Vivado v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 12:34:56 MST 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Thu Mar 19 16:06:06 2026
+# Process ID         : 115120
+# Current directory  : /home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs
+# Command line       : vivado -mode batch -source synth_divider_fp32_restoring.tcl -log vivado_divider_fp32_restoring.log -journal vivado_divider_fp32_restoring.jou
+# Log file           : /home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/vivado_divider_fp32_restoring.log
+# Journal file       : /home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/vivado_divider_fp32_restoring.jou
+# Running On         : bren-ubuntu24-04
+# Platform           : Ubuntu
+# Operating System   : Ubuntu 24.04.4 LTS
+# Processor Detail   : Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz
+# CPU Frequency      : 3691.926 MHz
+# CPU Physical cores : 4
+# CPU Logical cores  : 8
+# Host memory        : 16630 MB
+# Swap memory        : 4294 MB
+# Total Virtual      : 20925 MB
+# Available Virtual  : 11328 MB
+#-----------------------------------------------------------
+source synth_divider_fp32_restoring.tcl
+# create_project -in_memory -part xc7a35tcpg236-1
+# read_verilog -sv [list \
+#     /home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_restoring.sv \
+#     /home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_classify.sv \
+#     /home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_exception_check.sv \
+#     /home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_round_rne.sv \
+# ]
+# set_property top divider_fp32_restoring [current_fileset]
+ERROR: [Common 17-53] User Exception: No open design. Please open an elaborated, synthesized or implemented design before executing this command.
+INFO: [Common 17-206] Exiting Vivado at Thu Mar 19 16:06:15 2026...

@@ -1,0 +1,426 @@
+#-----------------------------------------------------------
+# Vivado v2025.2 (64-bit)
+# SW Build 6299465 on Fri Nov 14 12:34:56 MST 2025
+# IP Build 6300035 on Fri Nov 14 10:48:45 MST 2025
+# SharedData Build 6298862 on Thu Nov 13 04:50:51 MST 2025
+# Start of session at: Thu Mar 19 17:05:16 2026
+# Process ID         : 13939
+# Current directory  : /home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs
+# Command line       : vivado -mode batch -source synth_divider_fp32_newtonraphson.tcl -log vivado_divider_fp32_newtonraphson.log -journal vivado_divider_fp32_newtonraphson.jou
+# Log file           : /home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/vivado_divider_fp32_newtonraphson.log
+# Journal file       : /home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/vivado_divider_fp32_newtonraphson.jou
+# Running On         : bren-ubuntu24-04
+# Platform           : Ubuntu
+# Operating System   : Ubuntu 24.04.4 LTS
+# Processor Detail   : Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz
+# CPU Frequency      : 3692.281 MHz
+# CPU Physical cores : 4
+# CPU Logical cores  : 8
+# Host memory        : 16630 MB
+# Swap memory        : 4294 MB
+# Total Virtual      : 20925 MB
+# Available Virtual  : 15215 MB
+#-----------------------------------------------------------
+source synth_divider_fp32_newtonraphson.tcl
+# set_param general.maxThreads 4
+# create_project -in_memory -part xc7a35tcpg236-1
+# read_verilog -sv [list \
+#     /home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv \
+#     /home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_classify.sv /home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_exception_check.sv /home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_round_rne.sv \
+# ]
+# set xdc_file "/home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/clock_divider_fp32_newtonraphson.xdc"
+# set fp [open $xdc_file w]
+# puts $fp "create_clock -period 10.000 -name CLK \[get_ports CLK\]"
+# close $fp
+# read_xdc $xdc_file
+# synth_design -top divider_fp32_newtonraphson -part xc7a35tcpg236-1
+Command: synth_design -top divider_fp32_newtonraphson -part xc7a35tcpg236-1
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7a35t'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7a35t'
+INFO: [Device 21-403] Loading part xc7a35tcpg236-1
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 4 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 14008
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:06 ; elapsed = 00:00:06 . Memory (MB): peak = 2216.305 ; gain = 481.875 ; free physical = 8107 ; free virtual = 13045
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'divider_fp32_newtonraphson' [/home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv:44]
+INFO: [Synth 8-6157] synthesizing module 'fp32_classify' [/home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_classify.sv:24]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_classify' (0#1) [/home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_classify.sv:24]
+INFO: [Synth 8-6157] synthesizing module 'fp32_exception_check' [/home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_exception_check.sv:32]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_exception_check' (0#1) [/home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_exception_check.sv:32]
+INFO: [Synth 8-6157] synthesizing module 'fp32_round_rne' [/home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_round_rne.sv:48]
+INFO: [Synth 8-6155] done synthesizing module 'fp32_round_rne' (0#1) [/home/brendan/synthesis_workspace/Floating_Point_Dividers/fp32_round_rne.sv:48]
+INFO: [Synth 8-6155] done synthesizing module 'divider_fp32_newtonraphson' (0#1) [/home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv:44]
+WARNING: [Synth 8-6014] Unused sequential element prod64_reg was removed.  [/home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv:201]
+WARNING: [Synth 8-6014] Unused sequential element bx_trunc_reg was removed.  [/home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv:202]
+WARNING: [Synth 8-6014] Unused sequential element nr_sticky_reg was removed.  [/home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv:248]
+WARNING: [Synth 8-6014] Unused sequential element nr_exp_adj_reg was removed.  [/home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv:250]
+WARNING: [Synth 8-6014] Unused sequential element nr_mw_reg was removed.  [/home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv:251]
+WARNING: [Synth 8-7129] Port mant_wide[26] in module fp32_round_rne is either unconnected or has no load
+WARNING: [Synth 8-7129] Port mant_wide[25] in module fp32_round_rne is either unconnected or has no load
+WARNING: [Synth 8-7129] Port mant_wide[24] in module fp32_round_rne is either unconnected or has no load
+WARNING: [Synth 8-7129] Port a_exp[7] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port a_exp[6] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port a_exp[5] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port a_exp[4] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port a_exp[3] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port a_exp[2] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port a_exp[1] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port a_exp[0] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port b_exp[7] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port b_exp[6] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port b_exp[5] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port b_exp[4] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port b_exp[3] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port b_exp[2] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port b_exp[1] in module fp32_exception_check is either unconnected or has no load
+WARNING: [Synth 8-7129] Port b_exp[0] in module fp32_exception_check is either unconnected or has no load
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 2304.273 ; gain = 569.844 ; free physical = 8028 ; free virtual = 12967
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 2316.148 ; gain = 581.719 ; free physical = 8028 ; free virtual = 12967
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:08 ; elapsed = 00:00:09 . Memory (MB): peak = 2316.148 ; gain = 581.719 ; free physical = 8028 ; free virtual = 12967
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00 . Memory (MB): peak = 2316.148 ; gain = 0.000 ; free physical = 8027 ; free virtual = 12966
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [/home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/clock_divider_fp32_newtonraphson.xdc]
+Finished Parsing XDC File [/home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/clock_divider_fp32_newtonraphson.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2467.133 ; gain = 0.000 ; free physical = 8042 ; free virtual = 12981
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00.01 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2467.168 ; gain = 0.000 ; free physical = 8042 ; free virtual = 12981
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:17 ; elapsed = 00:00:17 . Memory (MB): peak = 2467.168 ; gain = 732.738 ; free physical = 8140 ; free virtual = 13080
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7a35tcpg236-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:17 ; elapsed = 00:00:17 . Memory (MB): peak = 2479.344 ; gain = 744.914 ; free physical = 8140 ; free virtual = 13080
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:17 ; elapsed = 00:00:18 . Memory (MB): peak = 2479.344 ; gain = 744.914 ; free physical = 8140 ; free virtual = 13080
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-3936] Found unconnected internal register 'final_prod_reg' and it is trimmed from '56' to '30' bits. [/home/brendan/synthesis_workspace/Floating_Point_Dividers/divider_fp32_newtonraphson.sv:242]
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'divider_fp32_newtonraphson'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+                  S_IDLE |                              000 |                             0000
+             S_EXCEPTION |                              001 |                             0101
+             S_ITER_MUL1 |                              010 |                             0001
+             S_ITER_MUL2 |                              011 |                             0010
+             S_FINAL_MUL |                              100 |                             0011
+             S_NORMALISE |                              101 |                             0100
+                S_OUTPUT |                              110 |                             0110
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'sequential' in module 'divider_fp32_newtonraphson'
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:18 ; elapsed = 00:00:18 . Memory (MB): peak = 2479.344 ; gain = 744.914 ; free physical = 8140 ; free virtual = 13080
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input   24 Bit       Adders := 1     
+	   2 Input   10 Bit       Adders := 2     
+	   3 Input   10 Bit       Adders := 1     
+	   2 Input    2 Bit       Adders := 1     
++---XORs : 
+	   2 Input      1 Bit         XORs := 2     
++---Registers : 
+	               32 Bit    Registers := 5     
+	               30 Bit    Registers := 1     
+	               27 Bit    Registers := 1     
+	               25 Bit    Registers := 1     
+	               18 Bit    Registers := 1     
+	               16 Bit    Registers := 1     
+	               10 Bit    Registers := 2     
+	                2 Bit    Registers := 1     
+	                1 Bit    Registers := 10    
++---Multipliers : 
+	              32x32  Multipliers := 2     
++---Muxes : 
+	   7 Input   32 Bit        Muxes := 2     
+	   2 Input   27 Bit        Muxes := 1     
+	   2 Input   24 Bit        Muxes := 2     
+	   2 Input   23 Bit        Muxes := 1     
+	   7 Input    3 Bit        Muxes := 1     
+	   2 Input    3 Bit        Muxes := 2     
+	   7 Input    2 Bit        Muxes := 1     
+	   2 Input    2 Bit        Muxes := 1     
+	   9 Input    1 Bit        Muxes := 3     
+	   2 Input    1 Bit        Muxes := 1     
+	   7 Input    1 Bit        Muxes := 16    
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 90 (col length:60)
+BRAMs: 100 (col length: RAMB18 60 RAMB36 30)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+DSP Report: Generating DSP factor2, operation Mode is: A2*B2.
+DSP Report: register b_reg_reg is absorbed into DSP factor2.
+DSP Report: register factor2 is absorbed into DSP factor2.
+DSP Report: operator factor2 is absorbed into DSP factor2.
+DSP Report: operator factor2 is absorbed into DSP factor2.
+DSP Report: Generating DSP factor2, operation Mode is: (PCIN>>17)+A2*B2.
+DSP Report: register x_reg_reg is absorbed into DSP factor2.
+DSP Report: register b_reg_reg is absorbed into DSP factor2.
+DSP Report: operator factor2 is absorbed into DSP factor2.
+DSP Report: operator factor2 is absorbed into DSP factor2.
+DSP Report: Generating DSP factor2, operation Mode is: A2*B2.
+DSP Report: register factor2 is absorbed into DSP factor2.
+DSP Report: register factor2 is absorbed into DSP factor2.
+DSP Report: operator factor2 is absorbed into DSP factor2.
+DSP Report: operator factor2 is absorbed into DSP factor2.
+DSP Report: Generating DSP factor2, operation Mode is: (PCIN>>17)+A2*B2.
+DSP Report: register x_reg_reg is absorbed into DSP factor2.
+DSP Report: register factor2 is absorbed into DSP factor2.
+DSP Report: operator factor2 is absorbed into DSP factor2.
+DSP Report: operator factor2 is absorbed into DSP factor2.
+DSP Report: Generating DSP x_reg0, operation Mode is: A2*B2.
+DSP Report: register x_reg_reg is absorbed into DSP x_reg0.
+DSP Report: register x_reg0 is absorbed into DSP x_reg0.
+DSP Report: operator x_reg0 is absorbed into DSP x_reg0.
+DSP Report: operator x_reg0 is absorbed into DSP x_reg0.
+DSP Report: Generating DSP x_reg0, operation Mode is: (PCIN>>17)+A2*B2.
+DSP Report: register factor_reg is absorbed into DSP x_reg0.
+DSP Report: register x_reg_reg is absorbed into DSP x_reg0.
+DSP Report: operator x_reg0 is absorbed into DSP x_reg0.
+DSP Report: operator x_reg0 is absorbed into DSP x_reg0.
+DSP Report: Generating DSP x_reg0, operation Mode is: A2*B2.
+DSP Report: register x_reg0 is absorbed into DSP x_reg0.
+DSP Report: register x_reg0 is absorbed into DSP x_reg0.
+DSP Report: operator x_reg0 is absorbed into DSP x_reg0.
+DSP Report: operator x_reg0 is absorbed into DSP x_reg0.
+DSP Report: Generating DSP x_reg0, operation Mode is: (PCIN>>17)+A2*B2.
+DSP Report: register factor_reg is absorbed into DSP x_reg0.
+DSP Report: register x_reg0 is absorbed into DSP x_reg0.
+DSP Report: operator x_reg0 is absorbed into DSP x_reg0.
+DSP Report: operator x_reg0 is absorbed into DSP x_reg0.
+DSP Report: Generating DSP final_prod0, operation Mode is: A2*B2.
+DSP Report: register final_prod0 is absorbed into DSP final_prod0.
+DSP Report: register final_prod0 is absorbed into DSP final_prod0.
+DSP Report: operator final_prod0 is absorbed into DSP final_prod0.
+DSP Report: operator final_prod0 is absorbed into DSP final_prod0.
+DSP Report: Generating DSP final_prod0, operation Mode is: (PCIN>>17)+A2*B2.
+DSP Report: register final_prod0 is absorbed into DSP final_prod0.
+DSP Report: register final_prod0 is absorbed into DSP final_prod0.
+DSP Report: operator final_prod0 is absorbed into DSP final_prod0.
+DSP Report: operator final_prod0 is absorbed into DSP final_prod0.
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:22 ; elapsed = 00:00:23 . Memory (MB): peak = 2479.344 ; gain = 744.914 ; free physical = 8130 ; free virtual = 13075
+---------------------------------------------------------------------------------
+ Sort Area is  final_prod0_8 : 0 0 : 3489 6422 : Used 1 time 0
+ Sort Area is  final_prod0_8 : 0 1 : 2933 6422 : Used 1 time 0
+ Sort Area is  factor2_0 : 0 0 : 3137 5949 : Used 1 time 0
+ Sort Area is  factor2_0 : 0 1 : 2812 5949 : Used 1 time 0
+ Sort Area is  x_reg0_6 : 0 0 : 3137 5949 : Used 1 time 0
+ Sort Area is  x_reg0_6 : 0 1 : 2812 5949 : Used 1 time 0
+ Sort Area is  factor2_3 : 0 0 : 2793 5484 : Used 1 time 0
+ Sort Area is  factor2_3 : 0 1 : 2691 5484 : Used 1 time 0
+ Sort Area is  x_reg0_7 : 0 0 : 2793 5484 : Used 1 time 0
+ Sort Area is  x_reg0_7 : 0 1 : 2691 5484 : Used 1 time 0
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+
+ROM: Preliminary Mapping Report
++---------------------------+------------+---------------+----------------+
+|Module Name                | RTL Object | Depth x Width | Implemented As | 
++---------------------------+------------+---------------+----------------+
+|divider_fp32_newtonraphson | seed_table | 256x9         | LUT            | 
+|divider_fp32_newtonraphson | p_0_out    | 256x9         | LUT            | 
++---------------------------+------------+---------------+----------------+
+
+
+DSP: Preliminary Mapping Report (see note below. The ' indicates corresponding REG is set)
++---------------------------+------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name                | DSP Mapping      | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++---------------------------+------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|divider_fp32_newtonraphson | A2*B2            | 18     | 16     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | (PCIN>>17)+A2*B2 | 16     | 16     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | A2*B2            | 18     | 18     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | (PCIN>>17)+A2*B2 | 18     | 16     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | A2*B2            | 18     | 16     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | (PCIN>>17)+A2*B2 | 16     | 16     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | A2*B2            | 18     | 18     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | (PCIN>>17)+A2*B2 | 18     | 16     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | A2*B2            | 25     | 18     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | (PCIN>>17)+A2*B2 | 25     | 16     | -      | -      | 38     | 1    | 1    | -    | -    | -     | 0    | 0    | 
++---------------------------+------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+Note: The table above is a preliminary report that shows the DSPs inferred at the current stage of the synthesis flow. Some DSP may be reimplemented as non DSP primitives later in the synthesis flow. Multiple instantiated DSPs are reported only once.
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP, Shift Register and Retiming Reporting
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:30 ; elapsed = 00:00:30 . Memory (MB): peak = 2572.344 ; gain = 837.914 ; free physical = 8030 ; free virtual = 12975
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:30 ; elapsed = 00:00:31 . Memory (MB): peak = 2584.359 ; gain = 849.930 ; free physical = 8023 ; free virtual = 12968
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:31 ; elapsed = 00:00:31 . Memory (MB): peak = 2603.391 ; gain = 868.961 ; free physical = 8001 ; free virtual = 12947
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:35 ; elapsed = 00:00:36 . Memory (MB): peak = 2771.203 ; gain = 1036.773 ; free physical = 7848 ; free virtual = 12794
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:35 ; elapsed = 00:00:36 . Memory (MB): peak = 2771.203 ; gain = 1036.773 ; free physical = 7848 ; free virtual = 12794
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:36 ; elapsed = 00:00:36 . Memory (MB): peak = 2771.203 ; gain = 1036.773 ; free physical = 7848 ; free virtual = 12794
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:36 ; elapsed = 00:00:36 . Memory (MB): peak = 2771.203 ; gain = 1036.773 ; free physical = 7848 ; free virtual = 12794
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:36 ; elapsed = 00:00:36 . Memory (MB): peak = 2771.203 ; gain = 1036.773 ; free physical = 7848 ; free virtual = 12794
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:36 ; elapsed = 00:00:36 . Memory (MB): peak = 2771.203 ; gain = 1036.773 ; free physical = 7848 ; free virtual = 12794
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+DSP Final Report (the ' indicates corresponding REG is set)
++---------------------------+------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name                | DSP Mapping      | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++---------------------------+------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|divider_fp32_newtonraphson | A'*B'            | 17     | 15     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | PCIN>>17+A'*B'   | 15     | 15     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | A'*B'            | 17     | 17     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | PCIN>>17+A*B'    | 0      | 15     | -      | -      | 48     | 0    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | A'*B'            | 17     | 15     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | PCIN>>17+A'*B'   | 15     | 15     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | A'*B'            | 17     | 17     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | PCIN>>17+A'*B'   | 17     | 15     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | A'*B'            | 24     | 17     | -      | -      | 48     | 1    | 1    | -    | -    | -     | 0    | 0    | 
+|divider_fp32_newtonraphson | (PCIN>>17+A*B')' | 0      | 15     | -      | -      | 38     | 0    | 1    | -    | -    | -     | 0    | 1    | 
++---------------------------+------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+--------+------+
+|      |Cell    |Count |
++------+--------+------+
+|1     |BUFG    |     1|
+|2     |CARRY4  |    41|
+|3     |DSP48E1 |    10|
+|5     |LUT1    |    32|
+|6     |LUT2    |   134|
+|7     |LUT3    |   107|
+|8     |LUT4    |    27|
+|9     |LUT5    |    26|
+|10    |LUT6    |    75|
+|11    |FDRE    |   110|
+|12    |IBUF    |    68|
+|13    |OBUF    |    38|
++------+--------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:36 ; elapsed = 00:00:36 . Memory (MB): peak = 2771.203 ; gain = 1036.773 ; free physical = 7848 ; free virtual = 12794
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 1 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:34 ; elapsed = 00:00:34 . Memory (MB): peak = 2771.203 ; gain = 885.754 ; free physical = 7848 ; free virtual = 12794
+Synthesis Optimization Complete : Time (s): cpu = 00:00:36 ; elapsed = 00:00:36 . Memory (MB): peak = 2771.211 ; gain = 1036.773 ; free physical = 7848 ; free virtual = 12794
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2771.211 ; gain = 0.000 ; free physical = 7848 ; free virtual = 12794
+INFO: [Netlist 29-17] Analyzing 51 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+Parsing XDC File [/home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/clock_divider_fp32_newtonraphson.xdc]
+Finished Parsing XDC File [/home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/clock_divider_fp32_newtonraphson.xdc]
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 2807.836 ; gain = 0.000 ; free physical = 8014 ; free virtual = 12959
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Synth Design complete | Checksum: 9a7b1808
+INFO: [Common 17-83] Releasing license: Synthesis
+24 Infos, 25 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:45 ; elapsed = 00:00:42 . Memory (MB): peak = 2807.871 ; gain = 1195.613 ; free physical = 8014 ; free virtual = 12959
+INFO: [Common 17-2834] synth_design peak Physical Memory [PSS] (MB): overall = 2129.205; main = 2129.205; forked = 345.424
+INFO: [Common 17-2834] synth_design peak Virtual Memory [VSS] (MB): overall = 3587.363; main = 2807.840; forked = 1028.016
+# report_utilization -file /home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/utilization_divider_fp32_newtonraphson.rpt
+# report_timing_summary -file /home/brendan/synthesis_workspace/Floating_Point_Dividers/synthesis_logs/timing_divider_fp32_newtonraphson.rpt
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Timing 38-91] UpdateTimingParams: Speed grade: -1, Delay Type: min_max.
+INFO: [Timing 38-191] Multithreading enabled for timing update using a maximum of 4 CPUs
+report_timing_summary: Time (s): cpu = 00:00:07 ; elapsed = 00:00:07 . Memory (MB): peak = 2807.871 ; gain = 0.000 ; free physical = 7988 ; free virtual = 12933
+INFO: [Common 17-206] Exiting Vivado at Thu Mar 19 17:06:12 2026...
